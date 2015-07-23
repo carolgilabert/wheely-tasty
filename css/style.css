@@ -1,0 +1,19 @@
+@import url('http://fonts.googleapis.com/css?family=Open+Sans');
+
+body {
+	padding: 0px;
+	font-family: "Open Sans", "Verdana";
+}
+
+#wheel {
+	width: 500px;
+	margin: 0 auto;
+}
+
+#spin {
+	width: 80px;
+	height: 30px;
+	font-size: 18px;
+	background-color: #a9f1bf;
+	color: white;
+}

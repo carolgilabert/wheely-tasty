@@ -1,0 +1,41 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>Wheely Tasty</title>
+  <meta name="description" content="The Lunch Decider">
+  <meta name="author" content="Carolina Gomez Gilabert">
+
+  <link rel="stylesheet" href="css/style.css?v=1.0">
+
+</head>
+
+<body>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"> </script>
+	<script src="js/wheel.js"> </script>
+	
+	<section id="wheel">  
+		<h2> Wheely Tasty v1.0 </h2>
+		<canvas id="wheelcanvas" width="500" height="500"></canvas>
+		<button type="button" id="spinner" value="spin"> Spin </button>
+	</section>
+
+	<script>
+		wheel = new Wheel({
+			canvas: document.getElementById('wheelcanvas'),
+			button: document.getElementById('spinner')
+		});
+	</script>
+	
+	<section id="facebook"> 
+		<div
+		  class="fb-like"
+		  data-share="true"
+		  data-width="450"
+		  data-show-faces="true">
+		</div>
+	</section>
+</body>
+</html>
