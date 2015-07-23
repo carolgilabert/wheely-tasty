@@ -16,7 +16,7 @@ Wheel = function(_opt) {
 	
 	//-- Init main properties	
 	this.restaurants = false;
-	this.colors = false;
+	this.colours = false;
 	
 	this.init();
 } 
@@ -43,13 +43,10 @@ Wheel.prototype.initWheelValues = function () {
 	this.spinTimeTotal = 0; 
 	this.ctx;
 	
-	this.colors = [];
-	for (var i = 0; i < 12; i++) {
-		_this.colors.push(_this.getColour());
+	this.colours = [];
+	for (var i = 0; i < this.restaurants.length; i++) {
+		_this.colours.push(_this.getColour());
 	}
-	
-	console.log(_this.colors);
-	console.log(_this.restaurants);
 	
 	_this.drawRouletteWheel();
 }
@@ -65,6 +62,7 @@ Wheel.prototype.loadRestaurants = function () {
 	}
 }
 
+//-- Aux function that returns a random hex colour
 Wheel.prototype.getColour = function() {
   return '#'+Math.floor(Math.random()*16777215).toString(16);
 }
@@ -88,7 +86,7 @@ Wheel.prototype.drawRouletteWheel = function() {
         
     for(var i = 0; i < 12; i++) {
       var angle = _this.startAngle + i * _this.arc;
-      _this.ctx.fillStyle = _this.colors[i];
+      _this.ctx.fillStyle = _this.colours[i];
       
       _this.ctx.beginPath();
       _this.ctx.arc(250, 250, outsideRadius, angle, angle + _this.arc, false);
