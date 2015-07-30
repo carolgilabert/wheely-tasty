@@ -35,8 +35,10 @@ Wheel.prototype.init = function () {
 
 //-- Initialises the mathematical values for the wheel calculations once the other data has been loaded
 Wheel.prototype.initWheelValues = function () {
+	var slots = this.restaurants.length;
+
 	this.startAngle = 0;
-	this.arc = Math.PI / 6;
+	this.arc = (2*Math.PI) / slots;
 	this.spinTimeout = null;
 	this.spinArcStart = 10;
 	this.spinTime = 0;
@@ -44,7 +46,7 @@ Wheel.prototype.initWheelValues = function () {
 	this.ctx;
 	
 	this.colours = [];
-	for (var i = 0; i < this.restaurants.length; i++) {
+	for (var i = 0; i < slots; i++) {
 		_this.colours.push(_this.getColour());
 	}
 	
@@ -71,6 +73,8 @@ Wheel.prototype.getColour = function() {
 Wheel.prototype.drawRouletteWheel = function() {
   if (_this.canvas === false) { return false; }
   if (_this.canvas.getContext) {
+  	var slots = this.restaurants.length;
+
     var outsideRadius = 200;
     var textRadius = 160;
     var insideRadius = 125;
@@ -84,7 +88,7 @@ Wheel.prototype.drawRouletteWheel = function() {
     
     _this.ctx.font = 'bold 12px sans-serif';
         
-    for(var i = 0; i < 12; i++) {
+    for(var i = 0; i < slots; i++) {
       var angle = _this.startAngle + i * _this.arc;
       _this.ctx.fillStyle = _this.colours[i];
       
