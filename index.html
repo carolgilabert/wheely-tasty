@@ -18,14 +18,15 @@
 	
 	<section id="wheel">  
 		<h2> Wheely Tasty v1.0 </h2>
-		<canvas id="wheelcanvas" width="500" height="500"></canvas>
+		<canvas id="wheelcanvas" width="800px" height="800px"></canvas>
 		<button type="button" id="spinner" value="spin"> Spin </button>
 	</section>
 
 	<script>
 		wheel = new Wheel({
 			canvas: document.getElementById('wheelcanvas'),
-			button: document.getElementById('spinner')
+			button: document.getElementById('spinner'),
+			size: 	800
 		});
 	</script>
 	

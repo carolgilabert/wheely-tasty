@@ -5,7 +5,8 @@ Wheel = function(_opt) {
 	
 	var opt = {
 		canvas: false,
-		button: false
+		button: false,
+		size: 	500
 	};
 	
 	opt = $.extend(opt, _opt);
@@ -17,6 +18,7 @@ Wheel = function(_opt) {
 	//-- Init main properties	
 	this.restaurants = false;
 	this.colours = false;
+	this.size = opt.size;
 	
 	this.init();
 } 
@@ -75,12 +77,12 @@ Wheel.prototype.drawRouletteWheel = function() {
   if (_this.canvas.getContext) {
   	var slots = this.restaurants.length;
 
-    var outsideRadius = 200;
-    var textRadius = 160;
-    var insideRadius = 125;
+    var outsideRadius = this.size*0.4;
+    var textRadius = this.size*0.32;
+    var insideRadius = this.size*0.25;
     
     _this.ctx = _this.canvas.getContext("2d");
-    _this.ctx.clearRect(0,0,500,500);
+    _this.ctx.clearRect(0,0,this.size,this.size);
     
     
     _this.ctx.strokeStyle = "black";
@@ -93,8 +95,8 @@ Wheel.prototype.drawRouletteWheel = function() {
       _this.ctx.fillStyle = _this.colours[i];
       
       _this.ctx.beginPath();
-      _this.ctx.arc(250, 250, outsideRadius, angle, angle + _this.arc, false);
-      _this.ctx.arc(250, 250, insideRadius, angle + _this.arc, angle, true);
+      _this.ctx.arc(this.size/2, this.size/2, outsideRadius, angle, angle + _this.arc, false);
+      _this.ctx.arc(this.size/2, this.size/2, insideRadius, angle + _this.arc, angle, true);
       _this.ctx.stroke();
       _this.ctx.fill();
       
@@ -104,7 +106,7 @@ Wheel.prototype.drawRouletteWheel = function() {
       _this.ctx.shadowBlur    = 0;
       _this.ctx.shadowColor   = "rgb(220,220,220)";
       _this.ctx.fillStyle = "black";
-      _this.ctx.translate(250 + Math.cos(angle + _this.arc / 2) * textRadius, 250 + Math.sin(angle + _this.arc / 2) * textRadius);
+      _this.ctx.translate(this.size/2 + Math.cos(angle + _this.arc / 2) * textRadius, this.size/2 + Math.sin(angle + _this.arc / 2) * textRadius);
       _this.ctx.rotate(angle + _this.arc / 2 + Math.PI / 2);
       var text = _this.restaurants[i].name;
       _this.ctx.fillText(text, -_this.ctx.measureText(text).width / 2, 0);
@@ -114,14 +116,14 @@ Wheel.prototype.drawRouletteWheel = function() {
     //Arrow
     _this.ctx.fillStyle = "black";
     _this.ctx.beginPath();
-    _this.ctx.moveTo(250 - 4, 250 - (outsideRadius + 5));
-    _this.ctx.lineTo(250 + 4, 250 - (outsideRadius + 5));
-    _this.ctx.lineTo(250 + 4, 250 - (outsideRadius - 5));
-    _this.ctx.lineTo(250 + 9, 250 - (outsideRadius - 5));
-    _this.ctx.lineTo(250 + 0, 250 - (outsideRadius - 13));
-    _this.ctx.lineTo(250 - 9, 250 - (outsideRadius - 5));
-    _this.ctx.lineTo(250 - 4, 250 - (outsideRadius - 5));
-    _this.ctx.lineTo(250 - 4, 250 - (outsideRadius + 5));
+    _this.ctx.moveTo(this.size/2 - 4, this.size/2 - (outsideRadius + 5));
+    _this.ctx.lineTo(this.size/2 + 4, this.size/2 - (outsideRadius + 5));
+    _this.ctx.lineTo(this.size/2 + 4, this.size/2 - (outsideRadius - 5));
+    _this.ctx.lineTo(this.size/2 + 9, this.size/2 - (outsideRadius - 5));
+    _this.ctx.lineTo(this.size/2 + 0, this.size/2 - (outsideRadius - 13));
+    _this.ctx.lineTo(this.size/2 - 9, this.size/2 - (outsideRadius - 5));
+    _this.ctx.lineTo(this.size/2 - 4, this.size/2 - (outsideRadius - 5));
+    _this.ctx.lineTo(this.size/2 - 4, this.size/2 - (outsideRadius + 5));
     _this.ctx.fill();
   }
 }
@@ -153,7 +155,7 @@ Wheel.prototype.stopRotateWheel = function() {
   _this.ctx.save();
   _this.ctx.font = 'bold 30px sans-serif';
   var text = _this.restaurants[index].name;
-  _this.ctx.fillText(text, 250 - _this.ctx.measureText(text).width / 2, 250 + 10);
+  _this.ctx.fillText(text, this.size/2 - _this.ctx.measureText(text).width / 2, this.size/2 + 10);
   _this.ctx.restore();
 }
   
