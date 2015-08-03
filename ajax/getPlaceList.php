@@ -2,16 +2,20 @@
 
 	define('FACEBOOK_ACCESS_TOKEN', '***REMOVED***');
 	
-	$lat = $_POST['lat'];
-	$lon = $_POST['lon'];
-			
-	$url = "https://graph.facebook.com/v2.3/search?q=";
-	$url .= "&type=place";
-	$url .= "&center=$lat,$lon";
-	$url .= "&distance=600";
-	$url .= "&limit=5000";
-	$url .= "&access_token=" . FACEBOOK_ACCESS_TOKEN;
-	
+	if (isset($_POST['url'])) {
+		$url = $_POST['url'];
+	} else {
+		$lat = $_POST['lat'];
+		$lon = $_POST['lon'];
+				
+		$url = "https://graph.facebook.com/v2.3/search?q=";
+		$url .= "&type=place";
+		$url .= "&center=$lat,$lon";
+		$url .= "&distance=5000";
+		$url .= "&limit=5000";
+		$url .= "&access_token=" . FACEBOOK_ACCESS_TOKEN;
+	}
+
 	$ch = curl_init();
 	//set the url, number of POST vars, POST data
     curl_setopt($ch, CURLOPT_URL, $url);
