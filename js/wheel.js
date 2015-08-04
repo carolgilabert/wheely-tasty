@@ -3,7 +3,6 @@ Wheel = function(_opt) {
 	
 	var opt = {
 		canvas: false,
-		button: false,
 		size: 	500
 	};
 	
@@ -29,7 +28,7 @@ Wheel.prototype.init = function () {
 	
 	//Bind the spin button
 	if (this.button !== false) {
-		$(this.button).click(
+		$(this.canvas).click(
 			(function(_this){ return function() { 
 				_this.spin.call(_this); 
 			} })(this)
