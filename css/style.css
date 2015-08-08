@@ -11,10 +11,25 @@ body {
 	cursor: pointer;
 }
 
+#wheelcanvas {
+	display: none;
+}
+
 #spin {
 	width: 80px;
 	height: 30px;
 	font-size: 18px;
 	background-color: #a9f1bf;
 	color: white;
+}
+
+/* Bootstrap Overrides */
+.navbar {
+	height: 70px;
+	line-height: 70px;
+	margin-bottom: 0px;
+}
+
+.navbar-brand {
+	padding: 10px 10px;
 }

@@ -2,8 +2,9 @@
 Wheel = function(_opt) {
 	
 	var opt = {
-		canvas: false,
-		size: 	500
+		loading: 	false,
+		canvas: 	false,
+		size: 		500
 	};
 	
 	opt = $.extend(opt, _opt);
@@ -11,6 +12,7 @@ Wheel = function(_opt) {
 	//-- Init external properties
 	this.canvas = opt.canvas;
 	this.button = opt.button;
+	this.loading = opt.loading;
 	
 	//-- Init main properties	
 	this.restaurants = [];
@@ -58,6 +60,9 @@ Wheel.prototype.initWheelValues = function () {
 
 //-- Obtains the user's location and fetches the restaurant data from Facebook
 Wheel.prototype.loadRestaurants = function () {
+	//First we show a loading screen
+	this.renderLoading('Determining your location');
+
 	//First we get the user's location
 	if(navigator.geolocation){ 
 		navigator.geolocation.getCurrentPosition(
@@ -124,6 +129,9 @@ Wheel.prototype.drawRouletteWheel = function() {
     this.ctx.lineTo(this.size/2 - 4, this.size/2 - (outsideRadius - 5));
     this.ctx.lineTo(this.size/2 - 4, this.size/2 - (outsideRadius + 5));
     this.ctx.fill();
+
+    this.loading.empty();
+    $(this.canvas).show();
   }
 }
   
@@ -205,6 +213,9 @@ Wheel.prototype.fetchData = function (_opt) {
 		};
 
 		this.position = data;
+
+		//Change loading screen
+		this.renderLoading('Fetching restaurants');
 	} else if (opt.url !== false) {
 		var data = {
 			url: opt.url
@@ -212,7 +223,7 @@ Wheel.prototype.fetchData = function (_opt) {
 	}
 	
 	$.ajax({
-	    url: '/ajax/getPlaceList.php',
+	    url: 'ajax/getPlaceList.php',
 	    data: data,
 	    dataType: 'json',
 	    method: 'POST',
@@ -259,6 +270,13 @@ Wheel.prototype.formatData = function (data) {
 		this.sortData();
 		this.initWheelValues();
 	}
+}
+
+Wheel.prototype.renderLoading = function (message) {
+	this.loading.empty();
+
+	this.loading.append($('<h3>', {class: 'title', text: message, style: 'width: 400px; text-align: center; margin: 0px auto;'}));
+	this.loading.append($('<div>', {class: 'loadingImage', style: 'margin: 0px auto; width: 128px; height: 85px; background-image: url(img/loading.gif); background-size: contain; background-repeat: no-repeat; background-position: 50% 50%;'}));
 }
 
 Wheel.prototype.sortData = function () {
