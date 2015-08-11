@@ -7,8 +7,10 @@ body {
 
 #wheel {
 	width: 800px;
-	margin: 0 auto;
+	margin: 0px auto;
 	cursor: pointer;
+    -webkit-transition: margin-left 2s;
+    transition: margin-left 2s;
 }
 
 #wheelcanvas {
@@ -21,6 +23,25 @@ body {
 	font-size: 18px;
 	background-color: #a9f1bf;
 	color: white;
+}
+
+#info {
+    width: 0px;
+    position: absolute;
+    top: 70px;
+    left: 0px;
+    background-color: #ececec;
+    -webkit-transition: width 1s;
+    transition: width 1s;
+    padding: 15px;
+}
+
+#info .info_close {
+	cursor: pointer;
+	width: 25px;
+	height: 25px;
+	float: right;
+	font-size: 25px;
 }
 
 /* Bootstrap Overrides */

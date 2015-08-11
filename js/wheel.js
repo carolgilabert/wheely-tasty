@@ -3,6 +3,7 @@ Wheel = function(_opt) {
 	
 	var opt = {
 		loading: 	false,
+		info: 		false,
 		canvas: 	false,
 		size: 		500
 	};
@@ -13,6 +14,7 @@ Wheel = function(_opt) {
 	this.canvas = opt.canvas;
 	this.button = opt.button;
 	this.loading = opt.loading;
+	this.info = opt.info;
 	
 	//-- Init main properties	
 	this.restaurants = [];
@@ -40,7 +42,7 @@ Wheel.prototype.init = function () {
 
 //-- Initialises the mathematical values for the wheel calculations once the other data has been loaded
 Wheel.prototype.initWheelValues = function () {
-	var slots = (this.restaurants.length > 20) ? 20 : this.restaurants.length > 20;
+	var slots = (this.restaurants.length > 20) ? 20 : this.restaurants.length;
 
 	this.startAngle = 0;
 	this.arc = (2*Math.PI) / slots;
@@ -79,7 +81,7 @@ Wheel.prototype.loadRestaurants = function () {
 Wheel.prototype.drawRouletteWheel = function() {
   if (this.canvas === false) { return false; }
   if (this.canvas.getContext) {
-  	var slots = (this.restaurants.length > 20) ? 20 : this.restaurants.length > 20;
+  	var slots = (this.restaurants.length > 20) ? 20 : this.restaurants.length;
 
     var outsideRadius = this.size*0.4;
     var textRadius = this.size*0.32;
@@ -113,6 +115,9 @@ Wheel.prototype.drawRouletteWheel = function() {
       this.ctx.translate(this.size/2 + Math.cos(angle + this.arc / 2) * textRadius, this.size/2 + Math.sin(angle + this.arc / 2) * textRadius);
       this.ctx.rotate(angle + this.arc / 2 + Math.PI / 2);
       var text = this.restaurants[i].name;
+      if (text.length > 20) {
+      	text = text.substr(0, 14);
+      } 
       this.ctx.fillText(text, -this.ctx.measureText(text).width / 2, 0);
       this.ctx.restore();
     } 
@@ -136,10 +141,13 @@ Wheel.prototype.drawRouletteWheel = function() {
 }
   
 Wheel.prototype.spin =  function() {
-  spinAngleStart = Math.random() * 10 + 10;
-  spinTime = 0;
-  spinTimeTotal = Math.random() * 3 + 4 * 1000;
-  this.rotateWheel();
+	if (this.info.outerWidth() > 0) {
+		this.closeInfo();
+	}
+	spinAngleStart = Math.random() * 10 + 10;
+	spinTime = 0;
+	spinTimeTotal = Math.random() * 3 + 4 * 1000;
+	this.rotateWheel();
 }
   
 Wheel.prototype.rotateWheel = function() {
@@ -162,6 +170,8 @@ Wheel.prototype.stopRotateWheel = function() {
   var degrees = this.startAngle * 180 / Math.PI + 90;
   var arcd = this.arc * 180 / Math.PI;
   var index = Math.floor((360 - degrees % 360) / arcd);
+  this.renderCard(index);
+
   this.ctx.save();
   this.ctx.font = 'bold 30px sans-serif';
   var text = this.restaurants[index].name;
@@ -275,9 +285,97 @@ Wheel.prototype.formatData = function (data) {
 Wheel.prototype.renderLoading = function (message) {
 	this.loading.empty();
 
-	this.loading.append($('<h3>', {class: 'title', text: message, style: 'width: 400px; text-align: center; margin: 0px auto;'}));
-	this.loading.append($('<div>', {class: 'loadingImage', style: 'margin: 0px auto; width: 128px; height: 85px; background-image: url(img/loading.gif); background-size: contain; background-repeat: no-repeat; background-position: 50% 50%;'}));
+	this.loading.append($('<h3>', {class: 'title', text: message, style: 'width: 400px; text-align: center; margin: 50px auto;'}));
+	this.loading.append($('<div>', {class: 'loadingImage', style: 'margin: 50px auto; width: 128px; height: 85px; background-image: url(img/loading.gif); background-size: contain; background-repeat: no-repeat; background-position: 50% 50%;'}));
 }
+
+Wheel.prototype.renderCard = function (index) {
+	var _this = this;
+
+	var info = this.getCardInfo(index);
+	this.info.empty();
+
+	info.done(function (data) {
+		var info_container = $('<div>');
+
+		var info_close = $('<div>', {class: 'info_close'});
+		info_close.click(
+			(function(_this){ return function() { 
+				_this.closeInfo.call(_this); 
+			} })(_this)
+		);
+		info_close.append($('<span>', {class: 'glyphicon glyphicon-remove'}) .attr('aria-hidden', true));
+		info_container.append(info_close);
+
+		//Picture
+		if (data.picture && data.picture.data && !data.picture.data.is_silhouette) { info_container.append($('<img>', {src: data.picture.data.url, width: '60px', height: '60px'})); }
+		//Name
+		if (data.name) { info_container.append($('<h3>', {class: 'card_title', text: data.name})); }
+		//Description
+		if (data.description) { info_container.append($('<p>', {class: 'card_description', text: data.description})); } else if (data.about) {info_container.append($('<p>', {class: 'card_description', text: data.about}));}
+		//Phone
+		if (data.phone) { 
+			info_container.append($('<h4>', {class: 'card_property', text: 'Phone number:'}));
+			info_container.append($('<p>', {class: 'card_phone', text: data.phone})); 
+		}
+		//Hours
+		if (data.hours) { 
+			info_container.append($('<h4>', {class: 'card_property', text: 'Opening times:'}));
+			var week = {}; week['mon'] = 'Monday'; week['tue'] = 'Tuesday'; week['wed'] = 'Wednesday'; week['thu'] = 'Thursday'; week['fri'] = 'Friday'; week['sat'] = 'Saturday'; week['sun'] = 'Sunday';
+
+			for (day in week) {
+				var string = '';
+				if (data.hours[day+'_1_open'] && data.hours[day+'_1_close']) {
+					string += week[day] + ': ' + data.hours[day+'_1_open'] + ' - ' + data.hours[day+'_1_close'];
+				}
+				if (data.hours[day+'_2_open'] && data.hours[day+'_2_close']) {
+					string += week[day] + ': ' + data.hours[day+'_2_open'] + ' - ' + data.hours[day+'_2_close'];
+				}
+				info_container.append($('<p>', {class: 'card_hours', text: string}))
+			}
+		}
+		//Address
+		if (data.location) {
+			info_container.append($('<h4>', {class: 'card_property', text: 'Address:'}));
+			if (data.location.street) { info_container.append($('<p>', {class: 'card_location', text: data.location.street})); }
+			if (data.location.city) { info_container.append($('<p>', {class: 'card_location', text: data.location.city})); }
+			if (data.location.zip) { info_container.append($('<p>', {class: 'card_location', text: data.location.zip})); }
+			if (data.location.country) { info_container.append($('<p>', {class: 'card_location', text: data.location.country})); }
+		} 
+		//Website
+		if (data.website) { 
+			info_container.append($('<h4>', {class: 'card_property', text: 'Website:'}));
+			info_container.append($('<p>', {class: 'card_website', text: data.website}))
+		}
+
+		_this.info.append(info_container);
+		_this.info.css('width', '400px');
+		$(_this.canvas).parent().css('marginLeft', '400px');
+	});
+
+	info.fail(function (data) {
+		//TODO - add some error handling
+	    console.log(data);
+	});
+	
+
+}
+
+Wheel.prototype.getCardInfo = function (index) {
+	return $.ajax({
+	    url: 'ajax/getPlaceInfo.php',
+	    data: {id: this.restaurants[index].id},
+	    dataType: 'json',
+	    method: 'POST'
+	});
+}
+
+Wheel.prototype.closeInfo = function () {
+	$(this.canvas).parent().css('margin', '0px auto');
+	this.info.empty();
+	this.info.css('width', '0px');
+}
+
 
 Wheel.prototype.sortData = function () {
 	this.restaurants.sort(function(a, b) {
