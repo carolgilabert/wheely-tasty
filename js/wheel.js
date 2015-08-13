@@ -70,11 +70,15 @@ Wheel.prototype.loadRestaurants = function () {
 		navigator.geolocation.getCurrentPosition(
 			(function(_this){ return function(data) { 
 				_this.fetchData.call(_this, data); 
-			} })(this)
+			} })(this), (function(_this){ return function() { 
+				_this.renderPostcodeModal.call(_this, {referer: 'no-location'}); 
+			} })(this), {
+		         enableHighAccuracy: true,
+		         timeout : 5000
+		    }
 		);
 	} else {
-		console.log("no location");
-		//TODO - prompt the user for his postcode and get location from there (google geocoding API)
+		this.renderPostcodeModal.call(_this); 
 	}
 }
   
@@ -207,6 +211,10 @@ Wheel.prototype.initFacebookSDK = function () {
 }
 
 Wheel.prototype.fetchData = function (_opt) {
+	//If the coords come from postcode, remove modal
+	$('.overlay').remove();
+	$('.modal').remove();
+
 	var _this = this;
 
 	var opt = {
@@ -282,11 +290,13 @@ Wheel.prototype.formatData = function (data) {
 	}
 }
 
-Wheel.prototype.renderLoading = function (message) {
+Wheel.prototype.renderLoading = function (message, showGif) {
 	this.loading.empty();
 
 	this.loading.append($('<h3>', {class: 'title', text: message, style: 'width: 400px; text-align: center; margin: 50px auto;'}));
-	this.loading.append($('<div>', {class: 'loadingImage', style: 'margin: 50px auto; width: 128px; height: 85px; background-image: url(img/loading.gif); background-size: contain; background-repeat: no-repeat; background-position: 50% 50%;'}));
+	if (!(typeof showGif !== 'undefined' && showGif === false)) {
+		this.loading.append($('<div>', {class: 'loadingImage', style: 'margin: 50px auto; width: 128px; height: 85px; background-image: url(img/loading.gif); background-size: contain; background-repeat: no-repeat; background-position: 50% 50%;'}));
+	}
 }
 
 Wheel.prototype.renderCard = function (index) {
@@ -298,13 +308,12 @@ Wheel.prototype.renderCard = function (index) {
 	info.done(function (data) {
 		var info_container = $('<div>');
 
-		var info_close = $('<div>', {class: 'info_close'});
+		var info_close = $('<button>', {class: 'close', type: 'button', text: 'x'});
 		info_close.click(
 			(function(_this){ return function() { 
 				_this.closeInfo.call(_this); 
 			} })(_this)
 		);
-		info_close.append($('<span>', {class: 'glyphicon glyphicon-remove'}) .attr('aria-hidden', true));
 		info_container.append(info_close);
 
 		//Picture
@@ -357,8 +366,49 @@ Wheel.prototype.renderCard = function (index) {
 		//TODO - add some error handling
 	    console.log(data);
 	});
-	
+}
 
+Wheel.prototype.renderPostcodeModal = function (opt) {
+	var _this = this;
+	$('body').append($('<div>', {class: 'overlay'}));
+	var modal = $('<div>', {class: 'modal'});
+	var modalDialog = $('<div>', {class: 'modal-dialog'});
+	var modalContent = $('<div>', {class: 'modal-content'});
+
+	//Header
+	var modalHeader = $('<div>', {class: 'modal-header'});
+	modalHeader.append($('<button>', {class: 'close', type: 'button', text: 'x'}) .attr('data-dismiss', 'modal') .attr('aria-hidden', 'true') .click(function() {
+		$('.overlay').remove();
+		$('.modal').remove();
+
+		if (typeof opt !== 'undefined' && opt.referer && opt.referer == 'no-location') {
+			_this.renderLoading('Your location could no be determined. Please click Search by Postcode to continue.', false);
+		}
+	}));
+	modalHeader.append($('<h4>', {class: 'modal-title', text: 'Search by Postcode'}));
+	//Body
+	var modalBody = $('<div>', {class: 'modal-body'});
+	if (typeof opt !== 'undefined' && opt.referer && opt.referer == 'no-location') {
+		modalBody.append($('<p>', {class: 'text-danger', text: 'There was issue determining your location.'}));	
+	}
+	modalBody.append($('<p>', {text: 'Please enter your postcode below:'}));
+	modalBody.append($('<input>', {type: 'text', id: 'postcode'}));
+	modalBody.append($('<span>', {class: 'help-block', text: 'If the postcode is from outside the UK, please also include your city name for accurate results.'}));
+	//Footer
+	var modalFooter = $('<div>', {class: 'modal-footer'});
+	modalFooter.append($('<button>', {type: 'button', class: 'btn btn-primary', text: 'Search'}) .click(
+		function() { 
+			googleGeocoding.codePostcode($('#postcode').val()); 
+		}
+	));
+
+	modalContent.append(modalHeader);
+	modalContent.append(modalBody);
+	modalContent.append(modalFooter);
+	modalDialog.append(modalContent);
+	modal.append(modalDialog);
+	$('body').append(modal);
+	$('modal').show();
 }
 
 Wheel.prototype.getCardInfo = function (index) {

@@ -10,15 +10,14 @@
 	<meta name="description" content="Wheely Tasty">
 	<meta name="author" content="Carolina Gomez Gilabert">
 
-	<!-- Latest compiled and minified CSS -->
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-
-	<!-- Optional theme -->
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
-
+	<!-- Bootstrap + Bootswatch Cosmo Theme -->
+	<link rel="stylesheet" href="css/bootstrap.min.css?v=1.0">
+	<!-- Custom styles -->
 	<link rel="stylesheet" href="css/style.css?v=1.0">
 	<link rel="icon" type="image/png" href="img/favicon.png">
 	<script src="js/wheel.js"> </script>
+	<script type="text/javascript" src="js/googleGeocoding.js"></script>
+	<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true"></script>
 </head>
 
 <body>
@@ -30,15 +29,15 @@
 		<div class="container-fluid">
 			<!-- Brand and toggle get grouped for better mobile display -->
 			<div class="navbar-header">
-				<a class="navbar-brand" href="#"><img src="img/logo.png" height="50px" width="219px" /></a>
+				<a class="navbar-brand" href="#"><img src="img/logo_white.png" height="50px" width="219px" /></a>
 			</div>
 
 			<!-- Collect the nav links, forms, and other content for toggling -->
 			<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 				<ul class="nav navbar-nav navbar-right">
-					<li><a href="#">Link</a></li>
+					<li><a href="#" onclick="wheel.renderPostcodeModal()"><span>Search by Postcode</span></a></li>
 					<li class="dropdown">
-						<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span>Dropdown</span> <span class="caret"></span></a>
 						<ul class="dropdown-menu">
 							<li><a href="#">Action</a></li>
 							<li><a href="#">Another action</a></li>
@@ -64,12 +63,16 @@
 	<section id="info"> </section>
 
 	<script>
+		//-- Init wheel
 		wheel = new Wheel({
 			loading: 	$('#loading'),
 			info: 		$('#info'),
 			canvas: 	document.getElementById('wheelcanvas'),
 			size: 		800
 		});
+
+		//-- Init google geocoding API
+		google.maps.event.addDomListener(window, 'load', googleGeocoding.init);
 	</script>
 
 	<!-- Latest compiled and minified JavaScript -->

@@ -1,7 +1,13 @@
 @import url('http://fonts.googleapis.com/css?family=Open+Sans');
 
+html {
+	height: 100%;
+}
+
 body {
 	padding: 0px;
+	min-height: 100%;
+	height: 100%;
 	font-family: "Open Sans", "Verdana";
 }
 
@@ -27,6 +33,7 @@ body {
 
 #info {
     width: 0px;
+    height: 100%;
     position: absolute;
     top: 70px;
     left: 0px;
@@ -36,21 +43,40 @@ body {
     padding: 15px;
 }
 
-#info .info_close {
-	cursor: pointer;
-	width: 25px;
-	height: 25px;
-	float: right;
-	font-size: 25px;
+#info .close {
+	color: #000;
+}
+
+/* overlay styles, all needed */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 10;
+}
+
+.modal {
+    display: block;
 }
 
 /* Bootstrap Overrides */
 .navbar {
 	height: 70px;
-	line-height: 70px;
 	margin-bottom: 0px;
 }
 
 .navbar-brand {
+    height: 70px;
 	padding: 10px 10px;
+}
+
+.navbar-nav>li>a {
+    height: 70px;
+}
+
+.navbar-nav>li>a>span {
+    vertical-align: middle;
 }
