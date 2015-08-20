@@ -18,7 +18,7 @@ Wheel = function(_opt) {
 	
 	//-- Init main properties	
 	this.restaurants = [];
-	this.colours = false;
+	this.colours = ['#D6BC38', '#2093B7', '#2E8B5C', '#D73728'];
 	this.size = opt.size;
 	
 	this.init();
@@ -51,11 +51,6 @@ Wheel.prototype.initWheelValues = function () {
 	this.spinTime = 0;
 	this.spinTimeTotal = 0; 
 	this.ctx;
-	
-	this.colours = [];
-	for (var i = 0; i < slots; i++) {
-		this.colours.push(this.getColour());
-	}
 	
 	this.drawRouletteWheel();
 }
@@ -96,13 +91,13 @@ Wheel.prototype.drawRouletteWheel = function() {
     
     
     this.ctx.strokeStyle = "black";
-    this.ctx.lineWidth = 2;
+    this.ctx.lineWidth = 1;
     
-    this.ctx.font = 'bold 12px sans-serif';
+    this.ctx.font = '48px sans-serif';
         
     for(var i = 0; i < slots; i++) {
       var angle = this.startAngle + i * this.arc;
-      this.ctx.fillStyle = this.colours[i];
+      this.ctx.fillStyle = this.colours[i%this.colours.length];
       
       this.ctx.beginPath();
       this.ctx.arc(this.size/2, this.size/2, outsideRadius, angle, angle + this.arc, false);
@@ -122,6 +117,7 @@ Wheel.prototype.drawRouletteWheel = function() {
       if (text.length > 20) {
       	text = text.substr(0, 14);
       } 
+      text = '?';
       this.ctx.fillText(text, -this.ctx.measureText(text).width / 2, 0);
       this.ctx.restore();
     } 
@@ -179,7 +175,8 @@ Wheel.prototype.stopRotateWheel = function() {
   this.ctx.save();
   this.ctx.font = 'bold 30px sans-serif';
   var text = this.restaurants[index].name;
-  this.ctx.fillText(text, this.size/2 - this.ctx.measureText(text).width / 2, this.size/2 + 10);
+  var textWidth = this.ctx.measureText(text).width > 400 ? 400 : this.ctx.measureText(text).width;
+  this.ctx.fillText(text, this.size/2 - textWidth / 2, this.size/2 + 10, textWidth);
   this.ctx.restore();
 }
   
@@ -219,10 +216,15 @@ Wheel.prototype.fetchData = function (_opt) {
 
 	var opt = {
 		coords: false,
+		clear: 	false,
 		url: 	false
 	};
 	
 	opt = $.extend(opt, _opt);
+
+	if (opt.clear !== false) {
+		this.restaurants = [];
+	}
 
 	if (opt.coords !== false) {
 		var data = {
@@ -399,6 +401,8 @@ Wheel.prototype.renderPostcodeModal = function (opt) {
 	modalFooter.append($('<button>', {type: 'button', class: 'btn btn-primary', text: 'Search'}) .click(
 		function() { 
 			googleGeocoding.codePostcode($('#postcode').val()); 
+			_this.closeInfo();
+			$(_this.canvas).hide();
 		}
 	));
 
