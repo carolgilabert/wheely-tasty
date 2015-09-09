@@ -12,7 +12,7 @@ body {
 }
 
 #wheel {
-	width: 800px;
+	width: 700px;
 	margin: 0px auto;
 	cursor: pointer;
     -webkit-transition: margin-left 2s;
@@ -41,10 +41,15 @@ body {
     -webkit-transition: width 1s;
     transition: width 1s;
     padding: 15px;
+    overflow: auto;
 }
 
 #info .close {
 	color: #000;
+}
+
+#map {
+    height: 300px;
 }
 
 /* overlay styles, all needed */
@@ -79,4 +84,12 @@ body {
 
 .navbar-nav>li>a>span {
     vertical-align: middle;
+}
+
+.alert {
+    width: 200px;
+    position: fixed;
+    top: 6em;
+    right: 2em;
+    z-index: 9;
 }

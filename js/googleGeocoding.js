@@ -35,4 +35,16 @@ GoogleGeocoding.prototype.codePostcode = function (postCode) {
 	});
 }
 
+GoogleGeocoding.prototype.initMap = function (location) {
+	var map = new google.maps.Map(document.getElementById('map'), {
+		center: {lat: location.lat, lng: location.lng},
+		zoom: 20
+	});
+
+	var marker = new google.maps.Marker({
+		position: location,
+		map: map
+	});
+}
+
 googleGeocoding = new GoogleGeocoding();

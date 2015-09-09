@@ -20,6 +20,8 @@ Wheel = function(_opt) {
 	this.restaurants = [];
 	this.colours = ['#D6BC38', '#2093B7', '#2E8B5C', '#D73728'];
 	this.size = opt.size;
+	this.return_fn = false;
+	this.return_data = false;
 	
 	this.init();
 } 
@@ -56,24 +58,44 @@ Wheel.prototype.initWheelValues = function () {
 }
 
 //-- Obtains the user's location and fetches the restaurant data from Facebook
-Wheel.prototype.loadRestaurants = function () {
-	//First we show a loading screen
-	this.renderLoading('Determining your location');
+Wheel.prototype.loadRestaurants = function (_opt) {
+	var opt = {
+		method: 		'location',
+		postcode: 		false,
+		return_fn: 		false,
+		return_data: 	false
+	};
+	
+	opt = $.extend(opt, _opt);
 
-	//First we get the user's location
-	if(navigator.geolocation){ 
-		navigator.geolocation.getCurrentPosition(
-			(function(_this){ return function(data) { 
-				_this.fetchData.call(_this, data); 
-			} })(this), (function(_this){ return function() { 
-				_this.renderPostcodeModal.call(_this, {referer: 'no-location'}); 
-			} })(this), {
-		         enableHighAccuracy: true,
-		         timeout : 5000
-		    }
-		);
+	this.return_fn = opt.return_fn;
+	this.return_data = opt.return_data;
+
+	$(this.canvas).hide();
+
+	if (opt.method == 'location') {
+		//First we show a loading screen
+		this.renderLoading('Determining your location');	
+
+		//First we get the user's location
+		if(navigator.geolocation){ 
+			navigator.geolocation.getCurrentPosition(
+				(function(_this){ return function(data) { 
+					data.clear = true;
+					_this.fetchData.call(_this, data); 
+				} })(this), (function(_this){ return function() { 
+					modals.renderPostcodeModal.call(modals, {referer: 'no-location'}); 
+				} })(this), {
+			         enableHighAccuracy: true,
+			         timeout : 5000
+			    }
+			);
+		} else {
+			modals.renderPostcodeModal.call(_this); 
+		}
 	} else {
-		this.renderPostcodeModal.call(_this); 
+		this.renderLoading('Loading');	
+		googleGeocoding.codePostcode(opt.postcode); 
 	}
 }
   
@@ -93,7 +115,7 @@ Wheel.prototype.drawRouletteWheel = function() {
     this.ctx.strokeStyle = "black";
     this.ctx.lineWidth = 1;
     
-    this.ctx.font = '48px sans-serif';
+    this.ctx.font = '10px sans-serif';
         
     for(var i = 0; i < slots; i++) {
       var angle = this.startAngle + i * this.arc;
@@ -109,7 +131,7 @@ Wheel.prototype.drawRouletteWheel = function() {
       this.ctx.shadowOffsetX = -1;
       this.ctx.shadowOffsetY = -1;
       this.ctx.shadowBlur    = 0;
-      this.ctx.shadowColor   = "rgb(220,220,220)";
+      this.ctx.shadowColor   = "rgb(222,222,222)";
       this.ctx.fillStyle = "black";
       this.ctx.translate(this.size/2 + Math.cos(angle + this.arc / 2) * textRadius, this.size/2 + Math.sin(angle + this.arc / 2) * textRadius);
       this.ctx.rotate(angle + this.arc / 2 + Math.PI / 2);
@@ -117,7 +139,7 @@ Wheel.prototype.drawRouletteWheel = function() {
       if (text.length > 20) {
       	text = text.substr(0, 14);
       } 
-      text = '?';
+      // text = '?';
       this.ctx.fillText(text, -this.ctx.measureText(text).width / 2, 0);
       this.ctx.restore();
     } 
@@ -178,6 +200,13 @@ Wheel.prototype.stopRotateWheel = function() {
   var textWidth = this.ctx.measureText(text).width > 400 ? 400 : this.ctx.measureText(text).width;
   this.ctx.fillText(text, this.size/2 - textWidth / 2, this.size/2 + 10, textWidth);
   this.ctx.restore();
+
+  if (this.return_fn !== false && this.return_data !== false) {
+  	this.return_fn(this.restaurants[index], this.return_data);	
+  	this.return_fn = false;
+  	this.return_data = false;
+  }
+  
 }
   
 Wheel.prototype.easeOut = function(t, b, c, d) {
@@ -248,19 +277,17 @@ Wheel.prototype.fetchData = function (_opt) {
 	    dataType: 'json',
 	    method: 'POST',
 	    success: function(data) {
+	    	console.log(data);
 		    if (data.data !== undefined) {
 			    _this.formatData(data);
 		    } else if (data.error !== undefined) {
-			    //TODO - add some error handling
-			    console.log(data);
+			    notifications.renderError(data.error);
 		    } else {
-			    //TODO - add some error handling
-			    console.log(data);
+			    notifications.renderError('An error has ocurred. Please try again');
 		    }
 	    },
 	    error: function(data) {
-		    //TODO - add some error handling
-		    console.log(data);
+		    notifications.renderError('An error has ocurred. Please try again');
 	    }
 	});
 }
@@ -340,7 +367,7 @@ Wheel.prototype.renderCard = function (index) {
 					string += week[day] + ': ' + data.hours[day+'_1_open'] + ' - ' + data.hours[day+'_1_close'];
 				}
 				if (data.hours[day+'_2_open'] && data.hours[day+'_2_close']) {
-					string += week[day] + ': ' + data.hours[day+'_2_open'] + ' - ' + data.hours[day+'_2_close'];
+					string += ' + ' + data.hours[day+'_2_open'] + ' - ' + data.hours[day+'_2_close'];
 				}
 				info_container.append($('<p>', {class: 'card_hours', text: string}))
 			}
@@ -356,63 +383,37 @@ Wheel.prototype.renderCard = function (index) {
 		//Website
 		if (data.website) { 
 			info_container.append($('<h4>', {class: 'card_property', text: 'Website:'}));
-			info_container.append($('<p>', {class: 'card_website', text: data.website}))
+			info_container.append($('<a>', {href: data.website, text: data.website, target: '_blank'}))
+		}
+
+		//Map
+		if (data.location.latitude && data.location.longitude) {
+			var panel = $('<div>', {class: 'panel panel-primary', id: 'map_panel'});
+			var panelHeading = $('<div>', {class: 'panel-heading'});
+			panelHeading.append($('<h3>', {class: 'panel-title', text: 'Map'}));
+			var panelBody = $('<div>', {class: 'panel-body'});
+			panelBody.append($('<div>', {id: 'map'}));
+			panel.append(panelHeading);
+			panel.append(panelBody);
+			info_container.append(panel);
 		}
 
 		_this.info.append(info_container);
 		_this.info.css('width', '400px');
 		$(_this.canvas).parent().css('marginLeft', '400px');
+
+		//Map pt 2
+		if (data.location.latitude && data.location.longitude) {
+			googleGeocoding.initMap({
+				lat: data.location.latitude,
+				lng: data.location.longitude
+			});
+		}
 	});
 
 	info.fail(function (data) {
-		//TODO - add some error handling
-	    console.log(data);
+		notifications.renderError('An error has ocurred. Please try again');
 	});
-}
-
-Wheel.prototype.renderPostcodeModal = function (opt) {
-	var _this = this;
-	$('body').append($('<div>', {class: 'overlay'}));
-	var modal = $('<div>', {class: 'modal'});
-	var modalDialog = $('<div>', {class: 'modal-dialog'});
-	var modalContent = $('<div>', {class: 'modal-content'});
-
-	//Header
-	var modalHeader = $('<div>', {class: 'modal-header'});
-	modalHeader.append($('<button>', {class: 'close', type: 'button', text: 'x'}) .attr('data-dismiss', 'modal') .attr('aria-hidden', 'true') .click(function() {
-		$('.overlay').remove();
-		$('.modal').remove();
-
-		if (typeof opt !== 'undefined' && opt.referer && opt.referer == 'no-location') {
-			_this.renderLoading('Your location could no be determined. Please click Search by Postcode to continue.', false);
-		}
-	}));
-	modalHeader.append($('<h4>', {class: 'modal-title', text: 'Search by Postcode'}));
-	//Body
-	var modalBody = $('<div>', {class: 'modal-body'});
-	if (typeof opt !== 'undefined' && opt.referer && opt.referer == 'no-location') {
-		modalBody.append($('<p>', {class: 'text-danger', text: 'There was issue determining your location.'}));	
-	}
-	modalBody.append($('<p>', {text: 'Please enter your postcode below:'}));
-	modalBody.append($('<input>', {type: 'text', id: 'postcode'}));
-	modalBody.append($('<span>', {class: 'help-block', text: 'If the postcode is from outside the UK, please also include your city name for accurate results.'}));
-	//Footer
-	var modalFooter = $('<div>', {class: 'modal-footer'});
-	modalFooter.append($('<button>', {type: 'button', class: 'btn btn-primary', text: 'Search'}) .click(
-		function() { 
-			googleGeocoding.codePostcode($('#postcode').val()); 
-			_this.closeInfo();
-			$(_this.canvas).hide();
-		}
-	));
-
-	modalContent.append(modalHeader);
-	modalContent.append(modalBody);
-	modalContent.append(modalFooter);
-	modalDialog.append(modalContent);
-	modal.append(modalDialog);
-	$('body').append(modal);
-	$('modal').show();
 }
 
 Wheel.prototype.getCardInfo = function (index) {
@@ -457,9 +458,4 @@ Wheel.prototype.getDistance = function (lat2,lon2) {
 //-- Aux function that converts degrees to radians
 Wheel.prototype.deg2rad = function (deg) {
 	return deg * (Math.PI/180)
-}
-
-//-- Aux function that returns a random hex colour
-Wheel.prototype.getColour = function() {
-  return '#'+Math.floor(Math.random()*16777215).toString(16);
 }

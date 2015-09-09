@@ -11,7 +11,7 @@
 		$url = "https://graph.facebook.com/v2.3/search?q=";
 		$url .= "&type=place";
 		$url .= "&center=$lat,$lon";
-		$url .= "&distance=5000";
+		$url .= "&distance=50000";
 		$url .= "&limit=5000";
 		$url .= "&access_token=" . FACEBOOK_ACCESS_TOKEN;
 	}
