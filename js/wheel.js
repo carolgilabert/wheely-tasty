@@ -281,7 +281,12 @@ Wheel.prototype.fetchData = function (_opt) {
 		    if (data.data !== undefined) {
 			    _this.formatData(data);
 		    } else if (data.error !== undefined) {
-			    notifications.renderError(data.error);
+				if (typeof(data.error) === 'object' && typeof(data.error.message) !== 'undefined') {
+					notifications.renderError(data.error.message);
+				} else {
+					notifications.renderError(data.error);
+				}
+
 		    } else {
 			    notifications.renderError('An error has ocurred. Please try again');
 		    }

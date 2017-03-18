@@ -19,11 +19,11 @@ GoogleGeocoding.prototype.codePostcode = function (postCode) {
 	geocoder.geocode( { 'address': postCode}, function(results, status) {
 		if (status == google.maps.GeocoderStatus.OK) {
 			if (results[0].geometry) {
-				wheel.fetchData( 
+				wheel.fetchData(
 					{
 						coords: {
-							latitude: results[0].geometry.location.G,
-							longitude: results[0].geometry.location.K
+							latitude: results[0].geometry.location.lat(),
+							longitude: results[0].geometry.location.lng()
 						},
 						clear: true
 					}
