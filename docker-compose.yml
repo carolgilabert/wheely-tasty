@@ -1,0 +1,21 @@
+wheelytasty:
+  image: php:apache
+  ports:
+    - "8001:80"
+    - "8443:443"
+  hostname: wheelytasty
+  links:
+    - wheelydb:mysql-master
+  volumes:
+    - /Users/carolgilabert/Dropbox/Development/wheely-tasty:/var/www/html
+wheelydb:
+  image: mysql
+  ports:
+    - "8306:3306"
+  environment:
+    MYSQL_ROOT_PASSWORD: ***REMOVED***
+    MYSQL_USER: wheelyt
+    MYSQL_PASSWORD: ***REMOVED***
+    MYSQL_DATABASE: wheely-tasty
+  volumes:
+    - ./sql:/docker-entrypoint-initdb.d
