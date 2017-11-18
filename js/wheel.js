@@ -277,8 +277,7 @@ Wheel.prototype.fetchData = function (_opt) {
 	    dataType: 'json',
 	    method: 'POST',
 	    success: function(data) {
-	    	console.log(data);
-		    if (data.data !== undefined) {
+	    	if (data.data !== undefined) {
 			    _this.formatData(data);
 		    } else if (data.error !== undefined) {
 				if (typeof(data.error) === 'object' && typeof(data.error.message) !== 'undefined') {
@@ -300,13 +299,19 @@ Wheel.prototype.fetchData = function (_opt) {
 Wheel.prototype.formatData = function (data) {
 	var result = data.data;
 	var restaurants = [];
-	for (var i = 0; i < result.length; i++) { 
-		if (result[i].category.toLowerCase().indexOf('restaurant') != -1) {
+	for (var i = 0; i < result.length; i++) {
+		if (result[i].category.toLowerCase().indexOf('restaurant') != -1
+			|| result[i].category.toLowerCase().indexOf('pub') != -1
+			|| result[i].category.toLowerCase().indexOf('coffee shop') != -1
+			|| result[i].category.toLowerCase().indexOf('cafe') != -1) {
 			result[i].distance = this.getDistance(result[i].location.latitude, result[i].location.longitude);
 			restaurants.push(result[i]);
 		} else {
 			for (var j = 0; j < result[i].category_list.length; j++) {
-				if (result[i].category_list[j].name.toLowerCase().indexOf('restaurant') != -1) {
+				if (result[i].category.toLowerCase().indexOf('restaurant') != -1
+                    || result[i].category.toLowerCase().indexOf('pub') != -1
+                    || result[i].category.toLowerCase().indexOf('coffee shop') != -1
+                    || result[i].category.toLowerCase().indexOf('cafe') != -1) {
 					result[i].distance = this.getDistance(result[i].location.latitude, result[i].location.longitude);
 					restaurants.push(result[i]);
 					break;

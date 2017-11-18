@@ -8,11 +8,12 @@
 		$lat = $_POST['lat'];
 		$lon = $_POST['lon'];
 				
-		$url = "https://graph.facebook.com/v2.3/search?q=";
-		$url .= "&type=place";
+		$url = "https://graph.facebook.com/v2.11/search?";
+		$url .= "type=place";
 		$url .= "&center=$lat,$lon";
-		$url .= "&distance=50000";
+		$url .= "&distance=1000";
 		$url .= "&limit=5000";
+		$url .= "&fields=id,name,category,category_list,location";
 		$url .= "&access_token=" . FACEBOOK_ACCESS_TOKEN;
 	}
 
